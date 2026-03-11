@@ -1,5 +1,6 @@
 # Prior knowledge-enhanced deep learning enables comprehensive spatial multi-omics integration
 
+![Framework](./figures/figure1.jpg)
 
 # Installation & Dependencies
 You'll need to install the following packages in order to run the codes.

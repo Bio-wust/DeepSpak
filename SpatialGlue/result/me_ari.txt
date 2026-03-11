@@ -1,4 +1,0 @@
-Combined embedding (ARI): 0.492987
-NMI: 0.5695076382473646
-AMI: 0.562116
-Homogeneity: 0.581233
