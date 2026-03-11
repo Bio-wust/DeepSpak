@@ -122,5 +122,5 @@ dmypy.json
 # DeepSpak directory
 DeepSpak/
 
-# Large data files (exceed GitHub limit)
-data/*.h5ad
+# Large data files tracked by Git LFS
+# data/*.h5ad - now using LFS
