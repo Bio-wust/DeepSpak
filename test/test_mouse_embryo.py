@@ -16,7 +16,7 @@ import mymodel.utils as u
 print("USING UTILS:", u.__file__)
 print("mclust_R SOURCE LINE:", u.mclust_R.__code__.co_firstlineno)
 
-# 设置随机种子确保可重复性
+# Set random seed for reproducibility
 def setup_seed(seed=2020):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -25,7 +25,7 @@ def setup_seed(seed=2020):
     torch.backends.cudnn.deterministic = True
     os.environ['PYTHONHASHSEED'] = str(seed)
 
-# 设置全局随机种子
+# Set global random seed
 setup_seed(2020)
 
 # read data
@@ -45,7 +45,7 @@ adata_omics2.obs = meta
 ground_truth = meta['Joint_clusters']
 
 
-parser = argparse.ArgumentParser(description='空间多组学数据训练')
+parser = argparse.ArgumentParser(description='Spatial multi-omics data training')
 parser.add_argument('--batch_size', default=2186, type=int)
 parser.add_argument("--temperature_f", default=0.9)
 parser.add_argument("--learning_rate", default=0.001)
@@ -60,49 +60,46 @@ parser.add_argument("--walk_steps", default=7)
 parser.add_argument("--use_adaptive_fusion", default=True)
 parser.add_argument("--fusion_hidden_dim", default=256)
 parser.add_argument("--fusion_dropout", default=0.0)
-parser.add_argument('--n_clusters', default=14, type=int, help='聚类数量')
-parser.add_argument('--feature_weight', type=float, default=None, help='特征图的融合权重，不设置则使用自适应权重')
-parser.add_argument('--spatial_weight', type=float, default=None, help='空间图的融合权重，不设置则使用自适应权重')
-parser.add_argument('--trrust_file', 
-                   type=str, 
-                   default='E:/code/mymodel2/data/Mouse_Brain/trrust_rawdata.mouse.tsv', 
-                   help='TRRUST数据库文件路径')
-parser.add_argument('--peak_tf_db', 
-                   type=str, 
-                   default='E:/code/mymodel2/data/mouse_embryo/peaks_to_tf_me.bed', 
-                   help='峰-TF数据库文件路径，支持BED/CSV/JSON格式')
+parser.add_argument('--n_clusters', default=14, type=int, help='Number of clusters')
+parser.add_argument('--feature_weight', type=float, default=None, help='Fusion weight for feature graph, use adaptive weight if not set')
+parser.add_argument('--spatial_weight', type=float, default=None, help='Fusion weight for spatial graph, use adaptive weight if not set')
+parser.add_argument('--trrust_file',
+                   type=str,
+                   default='E:/code/mymodel2/data/Mouse_Brain/trrust_rawdata.mouse.tsv',
+                   help='Path to TRRUST database file')
+parser.add_argument('--peak_tf_db',
+                   type=str,
+                   default='E:/code/mymodel2/data/mouse_embryo/peaks_to_tf_me.bed',
+                   help='Path to peak-TF database file, supports BED/CSV/JSON format')
 parser.add_argument('--datatype',
                    type=str,
                    default='SPOTS',
                    choices=['SPOTS', 'Spatial-epigenome-transcriptome'],
-                   help='数据类型，可选SPOTS或Spatial-epigenome-transcriptome')
+                   help='Data type, SPOTS or Spatial-epigenome-transcriptome')
 args = parser.parse_args()
 
 
-# 初始化数据加载器
-data_loader = SpatialOmicsDataLoader(
-    data_dir='E:/code/mymodel2/data/mouse_embryo/',
-    trrust_file_path=args.trrust_file,
-    peak_tf_db_path=args.peak_tf_db,
-    enable_context_filtering=False
-)
+# Initialize data loader
+# data_loader = SpatialOmicsDataLoader(
+#     data_dir='E:/code/mymodel2/data/mouse_embryo/',
+#     trrust_file_path=args.trrust_file,
+#     peak_tf_db_path=args.peak_tf_db,
+#     enable_context_filtering=False
+# )
 
 
-# 使用GRN填补数据
-adata_omics1= data_loader.impute_rna_with_grn(
-    adata_omics1, 
-    adata_omics2,
-    confidence_threshold=0.8,
-    min_cells=4,
-)
-# 在数据预处理之前应用填补
-print("应用ATAC数据填补...")
-adata_omics2= data_loader.impute_atac_with_peak_tf(
-    adata_omics1, 
-    adata_omics2,
-    confidence_threshold=0.1,
-    min_cells=30
-)
+# adata_omics1= data_loader.impute_rna_with_grn(
+#     adata_omics1, 
+#     adata_omics2,
+#     confidence_threshold=0.8,
+#     min_cells=4,
+# )
+# adata_omics2= data_loader.impute_atac_with_peak_tf(
+#     adata_omics1, 
+#     adata_omics2,
+#     confidence_threshold=0.1,
+#     min_cells=30
+# )
 
 
 
@@ -132,11 +129,11 @@ output = trainer.train()
 
 adata = adata_omics1.copy()  
 adata.obsm['DeepSpak'] = output['emb_combined'].copy()
-# 聚类
+# Clustering
 from mymodel.utils import clustering
 tool = 'mclust'  # mclust, leiden, and louvain
 
-# 对每个嵌入进行聚类
+# Cluster each embedding
 clustering(adata, key='DeepSpak', add_key='DeepSpak', n_clusters=args.n_clusters, method=tool, use_pca=True)
 Our_ari = adjusted_rand_score(adata.obs['DeepSpak'], ground_truth)
 print(f"Combined embedding (ARI): {Our_ari:.6f}")
