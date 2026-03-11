@@ -121,3 +121,6 @@ dmypy.json
 
 # DeepSpak directory
 DeepSpak/
+
+# Large data files (exceed GitHub limit)
+data/*.h5ad

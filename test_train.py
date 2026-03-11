@@ -115,8 +115,8 @@ class SpatialOmicsTrainer:
                 avg_feature_weight = w[:, 0].mean().item()
                 avg_spatial_weight = w[:, 1].mean().item()
                 weights.append((avg_feature_weight, avg_spatial_weight))
-            print(f"Epoch {epoch} Fusion weights - View1: Feature={weights[0][0]:.3f}, Spatial={weights[0][1]:.3f} | "
-                  f"View2: Feature={weights[1][0]:.3f}, Spatial={weights[1][1]:.3f}")
+            # print(f"Epoch {epoch} Fusion weights - View1: Feature={weights[0][0]:.3f}, Spatial={weights[0][1]:.3f} | "
+            #       f"View2: Feature={weights[1][0]:.3f}, Spatial={weights[1][1]:.3f}")
 
 
     def get_embeddings(self):
