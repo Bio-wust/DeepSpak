@@ -28,14 +28,22 @@ You'll need to install the following packages in order to run the codes.
 | R               | 4.4.1      |
 | mclust (R)      | 6.1.2      |
 
+# Tutorial
+For the step-by-step tutorial, please refer to:https://github.com/Bio-wust/DeepSpak/tree/main/tutorial
 
-# Usage
+# Dataset
 
-## Example command
+This project supports biology-guided imputation for three types of omics data. The data sources are as follows:
 
-Take the dataset "mouse_embryo" as an example
+## RNA Imputation
+- **Source**: [TRRUST](https://www.grtoolszen.com/trrust/) (Transcriptional Regulatory Relationships Unraveled by Sentence-based Text mining)
+- **Usage**: Predict and impute expression values of low-expression genes using the Gene Regulatory Network (GRN)
 
-```python
-python test_mouse_embryo.py
-```
+## ADT (Protein) Imputation
+- **Source**: [STRING](https://string-db.org/) (Search Tool for the Retrieval of Interacting Genes/Proteins)
+- **Usage**: Predict and impute protein expression data using the Protein-Protein Interaction (PPI) network
+
+## ATAC Imputation
+- **Source**: [GENCODE](https://www.gencodegenes.org/) (Gene and Variation Annotation)
+- **Usage**: Predict chromatin accessibility using Peak-TF (Transcription Factor binding site) mapping relationships based on TF expression levels
 
