@@ -1,18 +1,17 @@
 import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import torch
 import pandas as pd
 import scanpy as sc
-from matplotlib.pyplot import title
 import argparse
-from mymodel.preprocess import construct_neighbor_graph,lsi
-from sipbuild.generator.outputs import output_api
+from DeepSpak.preprocess import construct_neighbor_graph,lsi
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, homogeneity_score
-from mymodel.utils import read_list_from_file
-import matplotlib.pyplot as plt
-from mymodel.dataloder import SpatialOmicsDataLoader
+from DeepSpak.dataloder import SpatialOmicsDataLoader
 import numpy as np
 import random
-import mymodel.utils as u
+import DeepSpak.utils as u
 print("USING UTILS:", u.__file__)
 print("mclust_R SOURCE LINE:", u.mclust_R.__code__.co_firstlineno)
 
@@ -103,7 +102,7 @@ args = parser.parse_args()
 
 
 
-from mymodel.preprocess import pca ,lsi
+from DeepSpak.preprocess import pca ,lsi
 sc.pp.filter_genes(adata_omics1, min_cells=10)
 sc.pp.highly_variable_genes(adata_omics1, flavor="seurat_v3", n_top_genes=3000)
 sc.pp.normalize_total(adata_omics1, target_sum=1e4)
@@ -119,10 +118,10 @@ adata_omics2.obsm['feat'] = adata_omics2.obsm['X_lsi'].copy()
     
 
 data = construct_neighbor_graph(adata_omics1, adata_omics2)
-from mymodel.utils import clustering
+from DeepSpak.utils import clustering
 
 setup_seed(2020)
-from mymodel.test_train import SpatialOmicsTrainer
+from DeepSpak.test_train import SpatialOmicsTrainer
 trainer = SpatialOmicsTrainer(args, data)
 output = trainer.train()
 
@@ -130,7 +129,7 @@ output = trainer.train()
 adata = adata_omics1.copy()  
 adata.obsm['DeepSpak'] = output['emb_combined'].copy()
 # Clustering
-from mymodel.utils import clustering
+from DeepSpak.utils import clustering
 tool = 'mclust'  # mclust, leiden, and louvain
 
 # Cluster each embedding
