@@ -119,8 +119,5 @@ dmypy.json
 *.swp
 *.swo
 
-# DeepSpak directory
-DeepSpak/
-
 # Large data files tracked by Git LFS
 # data/*.h5ad - now using LFS
