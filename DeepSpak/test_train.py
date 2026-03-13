@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from .network import GCMA
-import numpy as np
+import numpy as np                                    
 import random
 from .preprocess import adjacent_matrix_preprocessing
 from .loss_test import Loss

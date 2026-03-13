@@ -4,6 +4,73 @@ import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from torch.nn.modules.module import Module
 from torch.nn.functional import normalize
+from typing import Optional
+
+
+class TransformerEncoderLayerWithAttn(nn.Module):
+    """
+    TransformerEncoderLayer, returning (output, attention weights)
+    """
+    def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048,
+                 dropout: float = 0.1, activation=F.relu, layer_norm_eps: float = 1e-5,
+                 batch_first: bool = False, norm_first: bool = False, bias: bool = True,
+                 device=None, dtype=None):
+        factory_kwargs = {'device': device, 'dtype': dtype}
+        super().__init__()
+
+        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout,
+                                               bias=bias, batch_first=batch_first, **factory_kwargs)
+
+        # Feedforward network
+        self.linear1 = nn.Linear(d_model, dim_feedforward, bias=bias, **factory_kwargs)
+        self.dropout = nn.Dropout(dropout)
+        self.linear2 = nn.Linear(dim_feedforward, d_model, bias=bias, **factory_kwargs)
+
+        self.norm_first = norm_first
+        self.norm1 = nn.LayerNorm(d_model, eps=layer_norm_eps, bias=bias, **factory_kwargs)
+        self.norm2 = nn.LayerNorm(d_model, eps=layer_norm_eps, bias=bias, **factory_kwargs)
+        self.dropout1 = nn.Dropout(dropout)
+        self.dropout2 = nn.Dropout(dropout)
+
+        # Legacy string support for activation function
+        if isinstance(activation, str):
+            if activation == "relu":
+                activation = F.relu
+            elif activation == "gelu":
+                activation = F.gelu
+            else:
+                raise RuntimeError(f"activation should be relu/gelu, not {activation}")
+
+        self.activation = activation
+
+    def forward(self, src: torch.Tensor, src_mask: Optional[torch.Tensor] = None,
+                src_key_padding_mask: Optional[torch.Tensor] = None,
+                is_causal: bool = False) -> tuple:
+        """
+        return (output, attention_weights)
+        """
+        x = src
+
+        # Self-attention with attention weights
+        attn_out, attn_weights = self.self_attn(
+            self.norm1(x), self.norm1(x), self.norm1(x),
+            attn_mask=src_mask,
+            key_padding_mask=src_key_padding_mask,
+            need_weights=True
+        )
+
+        if self.norm_first:
+            x = x + self.dropout1(attn_out)
+            x = x + self.dropout2(self._ff_block(self.norm2(x)))
+        else:
+            x = self.norm1(x + self.dropout1(attn_out))
+            x = self.norm2(x + self.dropout2(self._ff_block(x)))
+
+        return x, attn_weights
+
+    def _ff_block(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.linear2(self.dropout(self.activation(self.linear1(x))))
+        return x
 
 class GraphConvolution(Module):
     """
@@ -111,9 +178,9 @@ class GCMA(nn.Module):
             nn.Linear(low_feature_dim * view, high_feature_dim),
         )
         
-        self.TransformerEncoderLayer = nn.TransformerEncoderLayer(
-            d_model=low_feature_dim*view, 
-            nhead=1, 
+        self.TransformerEncoderLayer = TransformerEncoderLayerWithAttn(
+            d_model=low_feature_dim*view,
+            nhead=1,
             dim_feedforward=256
         )
         
