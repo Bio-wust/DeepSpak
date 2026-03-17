@@ -23,7 +23,6 @@ class Loss(nn.Module):
 
     @torch.no_grad()
     def random_walk_affinity(self, S, step=None):
-        """ 使用高阶随机游走计算相似性矩阵 """
         if step is None:
             step = self.walk_steps
         S = S / S.sum(dim=1, keepdim=True)  
@@ -32,7 +31,6 @@ class Loss(nn.Module):
         return S_final
 
     def Structure_guided_Contrastive_Loss(self, h_i, h_j, S):
-        """ 结合高阶随机游走计算的结构引导对比损失 """
         S_high_order = self.random_walk_affinity(S)  
         S_1 = S_high_order.repeat(2, 2)  
         all_one = torch.ones(self.batch_size * 2, self.batch_size * 2, device=self.device)

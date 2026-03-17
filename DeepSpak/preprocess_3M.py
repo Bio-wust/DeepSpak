@@ -14,13 +14,7 @@ from scipy.sparse import coo_matrix
 from sklearn.neighbors import NearestNeighbors
 from sklearn.neighbors import kneighbors_graph
 
-'''
----------------------
-author: Yahui Long https://github.com/JinmiaoChenLab/SpatialGlue
-e-mail: chen_jinmiao@bii.a-star.edu.sg
-AGPL-3.0 LICENSE
----------------------
-'''
+
 
 def construct_neighbor_graph(adata_omics1, adata_omics2, adata_omics3, n_neighbors=3):
     """
